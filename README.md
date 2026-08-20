@@ -31,7 +31,7 @@ sudo ./install.sh
 编辑 `config/config.conf`：
 
 \`\`\`bash
-SENDKEY="SCT369357TkHBPfF3j4zuUrweALzw1ByB7"    # 必填！获取地址：https://sct.ftqq.com
+SENDKEY="对应的sey"   必填！获取地址：https://sct.ftqq.com
 CPU_THRESHOLD=80                 # CPU 告警阈值（%）
 MEM_THRESHOLD=90                 # 内存告警阈值（%）
 DISK_THRESHOLD=85                # 磁盘告警阈值（%）
