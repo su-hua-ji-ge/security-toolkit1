@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-source ~/ops-toolkit/config/config.conf
+source ~/ops-toolkit/config/config.conf 2>/dev/null || true
 
 echo "========== 系统资源巡检报告 =========="
 echo "巡检时间：$(date '+%Y-%m-%d %H:%M:%S')"
@@ -8,8 +8,7 @@ echo "主机名：$(hostname)"
 echo ""
 
 # CPU
-cpu_idle=$(top -bn1 | grep "Cpu(s)" | awk '{print $8}' | cut -d'%' -f1)
-cpu_used=$(echo "100 - $cpu_idle" | bc 2>/dev/null || awk "BEGIN {printf \"%.0f\", 100 - $cpu_idle}")
+cpu_used=$(awk '/^cpu / {idle=$5; total=0; for(i=2;i<=NF;i++) total+=$i; printf "%.0f", (1-idle/total)*100}' /proc/stat)
 echo "[CPU]"
 echo "  使用率：${cpu_used}%"
 if [ "${cpu_used:-0}" -gt "${CPU_THRESHOLD:-80}" ]; then
@@ -18,10 +17,7 @@ fi
 echo ""
 
 # 内存
-mem_info=$(free | grep "Mem:")
-mem_total=$(echo "$mem_info" | awk '{print $2}')
-mem_used=$(echo "$mem_info" | awk '{print $3}')
-mem_pct=$(awk "BEGIN {printf \"%.0f\", $mem_used / $mem_total * 100}")
+mem_pct=$(free -k | awk '/^Mem:/ {printf "%d", $3/$2*100}')
 echo "[内存]"
 echo "  使用率：${mem_pct}%"
 if [ "${mem_pct:-0}" -gt "${MEM_THRESHOLD:-90}" ]; then
@@ -30,7 +26,7 @@ fi
 echo ""
 
 # 磁盘
-disk_use=$(df -h / | tail -1 | awk '{print $5}' | tr -d '%')
+disk_use=$(df -P -h / | tail -1 | awk '{print $5}' | tr -d '%')
 echo "[磁盘]"
 echo "  使用率：${disk_use}%"
 if [ "${disk_use:-0}" -gt "${DISK_THRESHOLD:-85}" ]; then
@@ -54,4 +50,3 @@ fi
 
 echo ""
 echo "========== 巡检结束 =========="
-

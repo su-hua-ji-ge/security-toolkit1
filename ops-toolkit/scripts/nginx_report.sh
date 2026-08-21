@@ -13,8 +13,8 @@ fi
 TOTAL=$(wc -l < "$LOG")
 UNIQUE_IP=$(awk '{print $1}' "$LOG" | sort -u | wc -l)
 TOP_IP=$(awk '{print $1}' "$LOG" | sort | uniq -c | sort -nr | head -10)
-SQLI_IP=$(grep -iE "(UNION|SELECT|SLEEP|sqlmap)" "$LOG" | awk '{print $1}' | sort | uniq -c | sort -nr)
-XSS_IP=$(grep -iE "(<script>|alert\(|onerror=)" "$LOG" | awk '{print $1}' | sort | uniq -c | sort -nr)
+SQLI_IP=$(grep -iE "(UNION|SELECT|SLEEP|sqlmap)" "$LOG" | awk '{print $1}' | sort | uniq -c | sort -nr) || true
+XSS_IP=$(grep -iE "(<script>|alert\(|onerror=)" "$LOG" | awk '{print $1}' | sort | uniq -c | sort -nr) || true
 
 # 生成 HTML 报告
 cat > "$OUTPUT" << EOF
@@ -53,4 +53,3 @@ $(echo "$XSS_IP" | awk '{printf "<tr><td>%s</td><td>%s</td></tr>\n", $1, $2}')
 EOF
 
 echo "报告已生成：$OUTPUT"
-
