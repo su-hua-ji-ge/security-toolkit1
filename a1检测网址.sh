@@ -7,7 +7,7 @@ mbiao="${mbiao/#\~/$HOME}"
 REPORT="/tmp/report_${ip}_$(date +%Y%m%d).md"
 echo "========== 信息收集报告：$ip ==========" > "$REPORT"
 echo "[子域名]" >> "$REPORT"
-echo "| 域名 | 状态码 | 服务器 | 开放端口 | 后台探测 |" >> "$REPORT"
+echo "| 域名 | 状态码 | 结果 | 服务器 | 开放端口 | 后台探测 |" >> "$REPORT"
 xh() {
 	local file="$1"
 	while read su; do
@@ -27,15 +27,14 @@ xh() {
 			RE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 3 "http://${su}/${path}" 2>/dev/null || true)
 			htlj="${htlj} ${path} --> ${RE}"
 		done
-	
 		if [ "${hz:-0}" = "200" ]; then
-			shuchu="$su --> $hz | 成功"
+		    shuchu="成功"
 		elif [ "${hz:-0}" = "301" ] || [ "${hz:-0}" = "302" ]; then
-			shuchu="$su --> $hz | 失败"
+		    shuchu="跳转"
 		else
-			shuchu="$su --> $hz | 失败"
+		    shuchu="失败"
 		fi
-		echo "| $su | ${hz:-?} | ${SE:-无} | ${ports:-无} | ${htlj:-无} |" >> "$REPORT"
+	echo "| $su | ${hz:-?} | ${shuchu:-?} | ${SE:-无} | ${ports:-无} | ${htlj:-无} |" >> "$REPORT"
 	done < "$file"
 	# 在 done < "$file" 之后加上
 	echo "" >> "$REPORT"
@@ -71,5 +70,5 @@ xh() {
 }
 xh "$mbiao"
 
-echo "============================================="
+echo "====================结束======================="
 
